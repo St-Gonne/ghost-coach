@@ -1,0 +1,1078 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Ghost Coach API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: user
+    description: User operations
+  - name: settings
+    description: Settings management
+  - name: activities
+    description: Activity library management
+  - name: locations
+    description: Location management
+  - name: routines
+    description: Physio routine prescriptions
+  - name: today
+    description: Today's plan
+  - name: week
+    description: Weekly history
+  - name: debug
+    description: Debug and plan preview
+  - name: integrations
+    description: Integration status
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /me:
+    get:
+      operationId: getMe
+      tags: [user]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /settings:
+    get:
+      operationId: getSettings
+      tags: [settings]
+      summary: Get user settings
+      responses:
+        "200":
+          description: User settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSettings"
+    put:
+      operationId: updateSettings
+      tags: [settings]
+      summary: Update user settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserSettingsInput"
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSettings"
+
+  /activities:
+    get:
+      operationId: listActivities
+      tags: [activities]
+      summary: List activity templates
+      responses:
+        "200":
+          description: List of activities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityTemplate"
+    post:
+      operationId: createActivity
+      tags: [activities]
+      summary: Create activity template
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ActivityTemplateInput"
+      responses:
+        "201":
+          description: Created activity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActivityTemplate"
+
+  /activities/{id}:
+    put:
+      operationId: updateActivity
+      tags: [activities]
+      summary: Update activity template
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ActivityTemplateInput"
+      responses:
+        "200":
+          description: Updated activity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActivityTemplate"
+    delete:
+      operationId: deleteActivity
+      tags: [activities]
+      summary: Delete activity template
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /locations:
+    get:
+      operationId: listLocations
+      tags: [locations]
+      summary: List saved locations
+      responses:
+        "200":
+          description: List of locations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Location"
+    post:
+      operationId: createLocation
+      tags: [locations]
+      summary: Create saved location
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LocationInput"
+      responses:
+        "201":
+          description: Created location
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Location"
+
+  /locations/{id}:
+    put:
+      operationId: updateLocation
+      tags: [locations]
+      summary: Update saved location
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LocationInput"
+      responses:
+        "200":
+          description: Updated location
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Location"
+
+  /locations/current:
+    post:
+      operationId: setCurrentLocation
+      tags: [locations]
+      summary: Set current active location
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CurrentLocationInput"
+      responses:
+        "200":
+          description: Location set
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Location"
+
+  /routines:
+    get:
+      operationId: listRoutines
+      tags: [routines]
+      summary: List routine prescriptions
+      responses:
+        "200":
+          description: List of routines
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RoutinePrescription"
+    post:
+      operationId: createRoutine
+      tags: [routines]
+      summary: Create routine prescription
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoutinePrescriptionInput"
+      responses:
+        "201":
+          description: Created routine
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoutinePrescription"
+
+  /routines/{id}:
+    put:
+      operationId: updateRoutine
+      tags: [routines]
+      summary: Update routine prescription
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoutinePrescriptionInput"
+      responses:
+        "200":
+          description: Updated routine
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoutinePrescription"
+
+  /today:
+    get:
+      operationId: getToday
+      tags: [today]
+      summary: Get today's plan
+      responses:
+        "200":
+          description: Today's plan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TodayPlan"
+
+  /today/replan:
+    post:
+      operationId: replan
+      tags: [today]
+      summary: Re-run the planner for today
+      responses:
+        "200":
+          description: New plan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TodayPlan"
+
+  /plan-items/{id}/action:
+    post:
+      operationId: planItemAction
+      tags: [today]
+      summary: Perform action on a plan item (done/partial/skip/start)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlanItemActionInput"
+      responses:
+        "200":
+          description: Updated plan item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlanItem"
+
+  /week:
+    get:
+      operationId: getWeek
+      tags: [week]
+      summary: Get weekly history and stats
+      responses:
+        "200":
+          description: Weekly summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WeekSummary"
+
+  /integrations/status:
+    get:
+      operationId: getIntegrationsStatus
+      tags: [integrations]
+      summary: Get status of all integrations
+      responses:
+        "200":
+          description: Integration statuses
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IntegrationsStatus"
+
+  /debug/plan-preview:
+    get:
+      operationId: getDebugPlanPreview
+      tags: [debug]
+      summary: Preview plan generation without saving
+      parameters:
+        - name: date
+          in: query
+          schema:
+            type: string
+        - name: locationId
+          in: query
+          schema:
+            type: string
+        - name: weatherOverride
+          in: query
+          schema:
+            type: string
+            description: Force a specific weather scenario (good, outdoor_good, outdoor_blocked, extreme_heat, outdoor_caution, indoor_only)
+      responses:
+        "200":
+          description: Plan preview with candidates and scores
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlanPreview"
+
+  /debug/mock-day:
+    post:
+      operationId: runMockDay
+      tags: [debug]
+      summary: Run a complete mock day simulation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MockDayInput"
+      responses:
+        "200":
+          description: Mock day result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlanPreview"
+
+  /debug/jobs:
+    get:
+      operationId: listDebugJobs
+      tags: [debug]
+      summary: List scheduled jobs
+      responses:
+        "200":
+          description: Job list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ScheduledJob"
+
+  /debug/jobs/{id}/retry:
+    post:
+      operationId: retryJob
+      tags: [debug]
+      summary: Retry a failed job
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Job retried
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScheduledJob"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+        mockMode:
+          type: boolean
+
+    User:
+      type: object
+      required: [id, email, displayName, timezone, isActive, createdAt]
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        displayName:
+          type: string
+        timezone:
+          type: string
+        telegramUserId:
+          type: ["string", "null"]
+        telegramChatId:
+          type: ["string", "null"]
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+
+    UserSettings:
+      type: object
+      required: [id, userId, morningBriefLocalTime, dayStartLocalTime, dayEndLocalTime, quietHoursStart, quietHoursEnd, targetActiveDaysPerWeek, minimumFreeWindowMinutes, transitionBufferMinutes, coachingIntensity, maxNudgesPerDay, calendarWriteEnabled, weatherHeatThresholdC, weatherRainProbabilityLimit, weatherWindLimitKph, preferCompletionOverProgression, weeklyReviewDay, weeklyReviewLocalTime]
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        morningBriefLocalTime:
+          type: string
+        dayStartLocalTime:
+          type: string
+        dayEndLocalTime:
+          type: string
+        quietHoursStart:
+          type: string
+        quietHoursEnd:
+          type: string
+        targetActiveDaysPerWeek:
+          type: integer
+        minimumFreeWindowMinutes:
+          type: integer
+        transitionBufferMinutes:
+          type: integer
+        coachingIntensity:
+          type: integer
+        maxNudgesPerDay:
+          type: integer
+        calendarWriteEnabled:
+          type: boolean
+        defaultLocationId:
+          type: ["string", "null"]
+        weatherHeatThresholdC:
+          type: number
+        weatherRainProbabilityLimit:
+          type: number
+        weatherWindLimitKph:
+          type: number
+        preferCompletionOverProgression:
+          type: boolean
+        weeklyReviewDay:
+          type: string
+        weeklyReviewLocalTime:
+          type: string
+
+    UserSettingsInput:
+      type: object
+      properties:
+        morningBriefLocalTime:
+          type: string
+        dayStartLocalTime:
+          type: string
+        dayEndLocalTime:
+          type: string
+        quietHoursStart:
+          type: string
+        quietHoursEnd:
+          type: string
+        targetActiveDaysPerWeek:
+          type: integer
+        minimumFreeWindowMinutes:
+          type: integer
+        transitionBufferMinutes:
+          type: integer
+        coachingIntensity:
+          type: integer
+        maxNudgesPerDay:
+          type: integer
+        calendarWriteEnabled:
+          type: boolean
+        defaultLocationId:
+          type: ["string", "null"]
+        weatherHeatThresholdC:
+          type: number
+        weatherRainProbabilityLimit:
+          type: number
+        weatherWindLimitKph:
+          type: number
+        preferCompletionOverProgression:
+          type: boolean
+        weeklyReviewDay:
+          type: string
+        weeklyReviewLocalTime:
+          type: string
+
+    ActivityTemplate:
+      type: object
+      required: [id, userId, name, category, goalTags, minimumMinutes, preferredMinutes, maximumMinutes, intensity, requiresFloorSpace, requiresPool, requiresStairs, requiresShower, requiresEquipment, minimumPrivacy, publicSuitability, weatherMode, allowedLocationTypes, preferenceScore, active, isPhysioApproved, version, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+        goalTags:
+          type: array
+          items:
+            type: string
+        minimumMinutes:
+          type: integer
+        preferredMinutes:
+          type: integer
+        maximumMinutes:
+          type: integer
+        intensity:
+          type: string
+        requiresFloorSpace:
+          type: boolean
+        requiresPool:
+          type: boolean
+        requiresStairs:
+          type: boolean
+        requiresShower:
+          type: boolean
+        requiresEquipment:
+          type: array
+          items:
+            type: string
+        minimumPrivacy:
+          type: string
+        publicSuitability:
+          type: string
+        weatherMode:
+          type: string
+        allowedLocationTypes:
+          type: array
+          items:
+            type: string
+        preferenceScore:
+          type: integer
+        active:
+          type: boolean
+        isPhysioApproved:
+          type: boolean
+        instructionsMarkdown:
+          type: ["string", "null"]
+        version:
+          type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    ActivityTemplateInput:
+      type: object
+      required: [name, category]
+      properties:
+        name:
+          type: string
+        category:
+          type: string
+        goalTags:
+          type: array
+          items:
+            type: string
+        minimumMinutes:
+          type: integer
+        preferredMinutes:
+          type: integer
+        maximumMinutes:
+          type: integer
+        intensity:
+          type: string
+        requiresFloorSpace:
+          type: boolean
+        requiresPool:
+          type: boolean
+        requiresStairs:
+          type: boolean
+        requiresShower:
+          type: boolean
+        requiresEquipment:
+          type: array
+          items:
+            type: string
+        minimumPrivacy:
+          type: string
+        publicSuitability:
+          type: string
+        weatherMode:
+          type: string
+        allowedLocationTypes:
+          type: array
+          items:
+            type: string
+        preferenceScore:
+          type: integer
+        active:
+          type: boolean
+        isPhysioApproved:
+          type: boolean
+        instructionsMarkdown:
+          type: string
+
+    Location:
+      type: object
+      required: [id, userId, label, timezone, locationType, hasFloorSpace, hasPool, hasStairs, hasIndoorWalk, hasShower, publicPrivacyLevel, typicalTravelOverheadMinutes, isDefault, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        label:
+          type: string
+        latitude:
+          type: ["number", "null"]
+        longitude:
+          type: ["number", "null"]
+        timezone:
+          type: string
+        locationType:
+          type: string
+        hasFloorSpace:
+          type: boolean
+        hasPool:
+          type: boolean
+        hasStairs:
+          type: boolean
+        hasIndoorWalk:
+          type: boolean
+        hasShower:
+          type: boolean
+        publicPrivacyLevel:
+          type: string
+        typicalTravelOverheadMinutes:
+          type: integer
+        isDefault:
+          type: boolean
+        lastConfirmedAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    LocationInput:
+      type: object
+      required: [label, locationType]
+      properties:
+        label:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        timezone:
+          type: string
+        locationType:
+          type: string
+        hasFloorSpace:
+          type: boolean
+        hasPool:
+          type: boolean
+        hasStairs:
+          type: boolean
+        hasIndoorWalk:
+          type: boolean
+        hasShower:
+          type: boolean
+        publicPrivacyLevel:
+          type: string
+        typicalTravelOverheadMinutes:
+          type: integer
+        isDefault:
+          type: boolean
+
+    CurrentLocationInput:
+      type: object
+      required: [locationId]
+      properties:
+        locationId:
+          type: string
+
+    RoutinePrescription:
+      type: object
+      required: [id, userId, activityTemplateId, sourceLabel, targetFrequencyPerWeek, minimumGapHours, validFrom, active, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        activityTemplateId:
+          type: string
+        activityTemplate:
+          $ref: "#/components/schemas/ActivityTemplate"
+        sourceLabel:
+          type: string
+        approvedOrPrescribedBy:
+          type: ["string", "null"]
+        targetFrequencyPerWeek:
+          type: integer
+        minimumGapHours:
+          type: integer
+        validFrom:
+          type: string
+        reviewAfter:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        active:
+          type: boolean
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    RoutinePrescriptionInput:
+      type: object
+      required: [activityTemplateId, sourceLabel, targetFrequencyPerWeek, minimumGapHours]
+      properties:
+        activityTemplateId:
+          type: string
+        sourceLabel:
+          type: string
+        approvedOrPrescribedBy:
+          type: string
+        targetFrequencyPerWeek:
+          type: integer
+        minimumGapHours:
+          type: integer
+        validFrom:
+          type: string
+        reviewAfter:
+          type: string
+        notes:
+          type: string
+        active:
+          type: boolean
+
+    PlanItem:
+      type: object
+      required: [id, dailyPlanId, activityTemplateId, role, scheduledStartAt, scheduledEndAt, state, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        dailyPlanId:
+          type: string
+        activityTemplateId:
+          type: string
+        activityTemplate:
+          $ref: "#/components/schemas/ActivityTemplate"
+        role:
+          type: string
+        scheduledStartAt:
+          type: string
+        scheduledEndAt:
+          type: string
+        locationId:
+          type: ["string", "null"]
+        locationLabelSnapshot:
+          type: ["string", "null"]
+        candidateScore:
+          type: ["number", "null"]
+        selectionReason:
+          type: ["string", "null"]
+        state:
+          type: string
+        calendarEventId:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    PlanItemActionInput:
+      type: object
+      required: [action]
+      properties:
+        action:
+          type: string
+        actualMinutes:
+          type: integer
+        skipReason:
+          type: string
+        notes:
+          type: string
+
+    TodayPlan:
+      type: object
+      required: [date, status, plannerMode]
+      properties:
+        planId:
+          type: ["string", "null"]
+        date:
+          type: string
+        status:
+          type: string
+        plannerMode:
+          type: string
+        reasoningSummary:
+          type: ["string", "null"]
+        morningMessage:
+          type: ["string", "null"]
+        primaryItem:
+          $ref: "#/components/schemas/PlanItem"
+        backupItem:
+          $ref: "#/components/schemas/PlanItem"
+        minimumWinItem:
+          $ref: "#/components/schemas/PlanItem"
+        location:
+          $ref: "#/components/schemas/Location"
+        weatherSummary:
+          type: ["string", "null"]
+        integrationWarnings:
+          type: array
+          items:
+            type: string
+
+    WeekSummary:
+      type: object
+      required: [weekStart, weekEnd, activeDaysCompleted, targetActiveDays, activeDayDates, completionRate, plannedMinutes, completedMinutes]
+      properties:
+        weekStart:
+          type: string
+        weekEnd:
+          type: string
+        activeDaysCompleted:
+          type: integer
+        targetActiveDays:
+          type: integer
+        activeDayDates:
+          type: array
+          items:
+            type: string
+        completionRate:
+          type: number
+        plannedMinutes:
+          type: integer
+        completedMinutes:
+          type: integer
+        physioSessions:
+          type: integer
+        physioTarget:
+          type: integer
+        days:
+          type: array
+          items:
+            $ref: "#/components/schemas/DaySummary"
+
+    DaySummary:
+      type: object
+      required: [date, outcome]
+      properties:
+        date:
+          type: string
+        outcome:
+          type: string
+        activityName:
+          type: ["string", "null"]
+        minutes:
+          type: ["integer", "null"]
+
+    IntegrationsStatus:
+      type: object
+      required: [mockMode, calendar, weather, telegram, llm]
+      properties:
+        mockMode:
+          type: boolean
+        calendar:
+          $ref: "#/components/schemas/IntegrationStatus"
+        weather:
+          $ref: "#/components/schemas/IntegrationStatus"
+        telegram:
+          $ref: "#/components/schemas/IntegrationStatus"
+        llm:
+          $ref: "#/components/schemas/IntegrationStatus"
+
+    IntegrationStatus:
+      type: object
+      required: [connected, mock]
+      properties:
+        connected:
+          type: boolean
+        mock:
+          type: boolean
+        lastCheckAt:
+          type: ["string", "null"]
+        error:
+          type: ["string", "null"]
+
+    Candidate:
+      type: object
+      required: [id, activityTemplateId, activityName, role, windowStart, windowEnd, locationId, locationLabel, score, scoreBreakdown, rejectionReasons]
+      properties:
+        id:
+          type: string
+        activityTemplateId:
+          type: string
+        activityName:
+          type: string
+        role:
+          type: string
+        windowStart:
+          type: string
+        windowEnd:
+          type: string
+        locationId:
+          type: string
+        locationLabel:
+          type: string
+        score:
+          type: number
+        scoreBreakdown:
+          type: object
+          additionalProperties:
+            type: number
+        rejectionReasons:
+          type: array
+          items:
+            type: string
+        isPassing:
+          type: boolean
+
+    PlanPreview:
+      type: object
+      required: [date, candidates, rejected, selected, morningMessage, plannerMode]
+      properties:
+        date:
+          type: string
+        candidates:
+          type: array
+          items:
+            $ref: "#/components/schemas/Candidate"
+        rejected:
+          type: array
+          items:
+            $ref: "#/components/schemas/Candidate"
+        selected:
+          $ref: "#/components/schemas/SelectedPlan"
+        morningMessage:
+          type: string
+        plannerMode:
+          type: string
+        weatherCondition:
+          type: string
+        locationLabel:
+          type: string
+
+    SelectedPlan:
+      type: object
+      required: [primaryCandidateId, backupCandidateId, minimumWinCandidateId]
+      properties:
+        primaryCandidateId:
+          type: string
+        backupCandidateId:
+          type: string
+        minimumWinCandidateId:
+          type: string
+        reasoningSummary:
+          type: string
+        caution:
+          type: string
+
+    ScheduledJob:
+      type: object
+      required: [id, jobType, dueAt, status, dedupeKey, attemptCount, maxAttempts, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        userId:
+          type: ["string", "null"]
+        jobType:
+          type: string
+        dueAt:
+          type: string
+        payload:
+          type: ["object", "null"]
+        status:
+          type: string
+        dedupeKey:
+          type: string
+        attemptCount:
+          type: integer
+        maxAttempts:
+          type: integer
+        lastError:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        completedAt:
+          type: ["string", "null"]
+
+    MockDayInput:
+      type: object
+      properties:
+        scenario:
+          type: string
+        locationId:
+          type: string
+        weatherOverride:
+          type: string
+        date:
+          type: string
