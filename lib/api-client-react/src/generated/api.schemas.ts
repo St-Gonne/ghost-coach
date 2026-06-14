@@ -23,6 +23,13 @@ export interface User {
   createdAt: string;
 }
 
+export interface AuthStatus {
+  authenticated: boolean;
+  mockMode: boolean;
+  allowedEmailConfigured: boolean;
+  user?: User | null;
+}
+
 export interface UserSettings {
   id: string;
   userId: string;
@@ -269,6 +276,13 @@ export interface WeekSummary {
   days?: DaySummary[];
 }
 
+export interface IntegrationAuthStatus {
+  authenticated: boolean;
+  allowedEmailConfigured: boolean;
+  /** @nullable */
+  userEmail?: string | null;
+}
+
 export interface IntegrationStatus {
   connected: boolean;
   mock: boolean;
@@ -278,12 +292,56 @@ export interface IntegrationStatus {
   error?: string | null;
 }
 
+export type CalendarIntegrationStatus = IntegrationStatus & ({
+  /** @nullable */
+  providerAccountEmail?: string | null;
+  selectedReadCalendarIds?: string[];
+  /** @nullable */
+  writeCalendarId?: string | null;
+  /** @nullable */
+  lastSuccessAt?: string | null;
+});
+
 export interface IntegrationsStatus {
   mockMode: boolean;
-  calendar: IntegrationStatus;
+  auth: IntegrationAuthStatus;
+  calendar: CalendarIntegrationStatus;
   weather: IntegrationStatus;
   telegram: IntegrationStatus;
   llm: IntegrationStatus;
+}
+
+export interface GoogleCalendar {
+  id: string;
+  summary: string;
+  primary: boolean;
+  accessRole: string;
+  selected: boolean;
+  writeSelected: boolean;
+}
+
+export interface GoogleCalendarsResponse {
+  calendars: GoogleCalendar[];
+}
+
+export interface SaveReadCalendarsInput {
+  calendarIds: string[];
+}
+
+export interface EnsureWriteCalendarResult {
+  calendarId: string;
+  summary: string;
+  created: boolean;
+}
+
+export interface GoogleCalendarReadTestResult {
+  ok: boolean;
+  eventCount: number;
+}
+
+export interface GoogleCalendarWriteTestResult {
+  ok: boolean;
+  eventId: string;
 }
 
 export type CandidateScoreBreakdown = {[key: string]: number};

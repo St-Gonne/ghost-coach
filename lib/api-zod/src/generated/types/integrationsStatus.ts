@@ -5,11 +5,14 @@
  * Ghost Coach API
  * OpenAPI spec version: 0.1.0
  */
+import type { CalendarIntegrationStatus } from './calendarIntegrationStatus';
+import type { IntegrationAuthStatus } from './integrationAuthStatus';
 import type { IntegrationStatus } from './integrationStatus';
 
 export interface IntegrationsStatus {
   mockMode: boolean;
-  calendar: IntegrationStatus;
+  auth: IntegrationAuthStatus;
+  calendar: CalendarIntegrationStatus;
   weather: IntegrationStatus;
   telegram: IntegrationStatus;
   llm: IntegrationStatus;

@@ -3,7 +3,9 @@ import type { WeatherAdapter } from "./weather";
 import type { TelegramAdapter } from "./telegram";
 import type { LLMAdapter } from "./llm";
 import { MockCalendarAdapter } from "./calendar/mock-calendar";
+import { GoogleCalendarAdapter } from "./calendar/google-calendar";
 import { MockWeatherAdapter } from "./weather/mock-weather";
+import { OpenMeteoWeatherAdapter } from "./weather/open-meteo";
 import { MockTelegramAdapter } from "./telegram/mock-telegram";
 import { MockLLMAdapter } from "./llm/mock-llm";
 import type { WeatherScenario } from "./weather/mock-weather";
@@ -29,8 +31,8 @@ export function getAdapters(): AdapterRegistry {
       };
     } else {
       registry = {
-        calendar: new MockCalendarAdapter(),
-        weather: new MockWeatherAdapter(),
+        calendar: new GoogleCalendarAdapter(),
+        weather: new OpenMeteoWeatherAdapter(),
         telegram: new MockTelegramAdapter(),
         llm: new MockLLMAdapter(),
       };

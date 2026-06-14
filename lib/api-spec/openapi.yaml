@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication and session operations
   - name: user
     description: User operations
   - name: settings
@@ -42,6 +44,37 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/status:
+    get:
+      operationId: getAuthStatus
+      tags: [auth]
+      summary: Get authentication and session status
+      responses:
+        "200":
+          description: Authentication status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthStatus"
+
+  /auth/google/start:
+    get:
+      operationId: startGoogleAuth
+      tags: [auth]
+      summary: Start Google OAuth sign-in
+      responses:
+        "302":
+          description: Redirect to Google OAuth consent
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: End the current authenticated session
+      responses:
+        "204":
+          description: Logged out
 
   /me:
     get:
@@ -366,6 +399,73 @@ paths:
               schema:
                 $ref: "#/components/schemas/IntegrationsStatus"
 
+  /integrations/google/calendars:
+    get:
+      operationId: listGoogleCalendars
+      tags: [integrations]
+      summary: List Google calendars available for read and write selection
+      responses:
+        "200":
+          description: Available Google calendars
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GoogleCalendarsResponse"
+
+  /integrations/google/read-calendars:
+    post:
+      operationId: saveReadCalendars
+      tags: [integrations]
+      summary: Save the selected read calendars
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SaveReadCalendarsInput"
+      responses:
+        "204":
+          description: Saved
+
+  /integrations/google/write-calendar/ensure:
+    post:
+      operationId: ensureWriteCalendar
+      tags: [integrations]
+      summary: Ensure the dedicated Ghost Coach write calendar exists and is selected
+      responses:
+        "200":
+          description: Write calendar ensured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnsureWriteCalendarResult"
+
+  /integrations/google/test-read:
+    post:
+      operationId: testGoogleRead
+      tags: [integrations]
+      summary: Test reading selected Google calendars
+      responses:
+        "200":
+          description: Read test result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GoogleCalendarReadTestResult"
+
+  /integrations/google/test-write:
+    post:
+      operationId: testGoogleWrite
+      tags: [integrations]
+      summary: Test creating and deleting a temporary event in the dedicated write calendar
+      responses:
+        "200":
+          description: Write test result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GoogleCalendarWriteTestResult"
+
   /debug/plan-preview:
     get:
       operationId: getDebugPlanPreview
@@ -456,6 +556,21 @@ components:
           type: string
         mockMode:
           type: boolean
+
+    AuthStatus:
+      type: object
+      required: [authenticated, mockMode, allowedEmailConfigured]
+      properties:
+        authenticated:
+          type: boolean
+        mockMode:
+          type: boolean
+        allowedEmailConfigured:
+          type: boolean
+        user:
+          oneOf:
+            - $ref: "#/components/schemas/User"
+            - type: "null"
 
     User:
       type: object
@@ -935,18 +1050,31 @@ components:
 
     IntegrationsStatus:
       type: object
-      required: [mockMode, calendar, weather, telegram, llm]
+      required: [mockMode, auth, calendar, weather, telegram, llm]
       properties:
         mockMode:
           type: boolean
+        auth:
+          $ref: "#/components/schemas/IntegrationAuthStatus"
         calendar:
-          $ref: "#/components/schemas/IntegrationStatus"
+          $ref: "#/components/schemas/CalendarIntegrationStatus"
         weather:
           $ref: "#/components/schemas/IntegrationStatus"
         telegram:
           $ref: "#/components/schemas/IntegrationStatus"
         llm:
           $ref: "#/components/schemas/IntegrationStatus"
+
+    IntegrationAuthStatus:
+      type: object
+      required: [authenticated, allowedEmailConfigured]
+      properties:
+        authenticated:
+          type: boolean
+        allowedEmailConfigured:
+          type: boolean
+        userEmail:
+          type: ["string", "null"]
 
     IntegrationStatus:
       type: object
@@ -960,6 +1088,86 @@ components:
           type: ["string", "null"]
         error:
           type: ["string", "null"]
+
+    CalendarIntegrationStatus:
+      allOf:
+        - $ref: "#/components/schemas/IntegrationStatus"
+        - type: object
+          properties:
+            providerAccountEmail:
+              type: ["string", "null"]
+            selectedReadCalendarIds:
+              type: array
+              items:
+                type: string
+            writeCalendarId:
+              type: ["string", "null"]
+            lastSuccessAt:
+              type: ["string", "null"]
+
+    GoogleCalendar:
+      type: object
+      required: [id, summary, primary, accessRole, selected, writeSelected]
+      properties:
+        id:
+          type: string
+        summary:
+          type: string
+        primary:
+          type: boolean
+        accessRole:
+          type: string
+        selected:
+          type: boolean
+        writeSelected:
+          type: boolean
+
+    GoogleCalendarsResponse:
+      type: object
+      required: [calendars]
+      properties:
+        calendars:
+          type: array
+          items:
+            $ref: "#/components/schemas/GoogleCalendar"
+
+    SaveReadCalendarsInput:
+      type: object
+      required: [calendarIds]
+      properties:
+        calendarIds:
+          type: array
+          items:
+            type: string
+
+    EnsureWriteCalendarResult:
+      type: object
+      required: [calendarId, summary, created]
+      properties:
+        calendarId:
+          type: string
+        summary:
+          type: string
+        created:
+          type: boolean
+
+    GoogleCalendarReadTestResult:
+      type: object
+      required: [ok, eventCount]
+      properties:
+        ok:
+          type: boolean
+        eventCount:
+          type: integer
+
+    GoogleCalendarWriteTestResult:
+      type: object
+      required: [ok, eventId]
+      properties:
+        ok:
+          type: boolean
+        eventId:
+          type: string
 
     Candidate:
       type: object

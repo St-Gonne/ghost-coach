@@ -22,8 +22,13 @@ import type {
 import type {
   ActivityTemplate,
   ActivityTemplateInput,
+  AuthStatus,
   CurrentLocationInput,
+  EnsureWriteCalendarResult,
   GetDebugPlanPreviewParams,
+  GoogleCalendarReadTestResult,
+  GoogleCalendarWriteTestResult,
+  GoogleCalendarsResponse,
   HealthStatus,
   IntegrationsStatus,
   Location,
@@ -34,6 +39,7 @@ import type {
   PlanPreview,
   RoutinePrescription,
   RoutinePrescriptionInput,
+  SaveReadCalendarsInput,
   ScheduledJob,
   TodayPlan,
   User,
@@ -130,6 +136,230 @@ export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, 
 
 
 
+
+export const getGetAuthStatusUrl = () => {
+
+
+
+
+  return `/api/auth/status`
+}
+
+/**
+ * @summary Get authentication and session status
+ */
+export const getAuthStatus = async ( options?: RequestInit): Promise<AuthStatus> => {
+
+  return customFetch<AuthStatus>(getGetAuthStatusUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAuthStatusQueryKey = () => {
+    return [
+    `/api/auth/status`
+    ] as const;
+    }
+
+
+export const getGetAuthStatusQueryOptions = <TData = Awaited<ReturnType<typeof getAuthStatus>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAuthStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAuthStatusQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthStatus>>> = ({ signal }) => getAuthStatus({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAuthStatus>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetAuthStatusQueryResult = NonNullable<Awaited<ReturnType<typeof getAuthStatus>>>
+export type GetAuthStatusQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get authentication and session status
+ */
+
+export function useGetAuthStatus<TData = Awaited<ReturnType<typeof getAuthStatus>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAuthStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetAuthStatusQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getStartGoogleAuthUrl = () => {
+
+
+
+
+  return `/api/auth/google/start`
+}
+
+/**
+ * @summary Start Google OAuth sign-in
+ */
+export const startGoogleAuth = async ( options?: RequestInit): Promise<unknown> => {
+
+  return customFetch<unknown>(getStartGoogleAuthUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getStartGoogleAuthQueryKey = () => {
+    return [
+    `/api/auth/google/start`
+    ] as const;
+    }
+
+
+export const getStartGoogleAuthQueryOptions = <TData = Awaited<ReturnType<typeof startGoogleAuth>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof startGoogleAuth>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getStartGoogleAuthQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof startGoogleAuth>>> = ({ signal }) => startGoogleAuth({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof startGoogleAuth>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type StartGoogleAuthQueryResult = NonNullable<Awaited<ReturnType<typeof startGoogleAuth>>>
+export type StartGoogleAuthQueryError = ErrorType<void>
+
+
+/**
+ * @summary Start Google OAuth sign-in
+ */
+
+export function useStartGoogleAuth<TData = Awaited<ReturnType<typeof startGoogleAuth>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof startGoogleAuth>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getStartGoogleAuthQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getLogoutUrl = () => {
+
+
+
+
+  return `/api/auth/logout`
+}
+
+/**
+ * @summary End the current authenticated session
+ */
+export const logout = async ( options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getLogoutUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getLogoutMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError,void, TContext> => {
+
+const mutationKey = ['logout'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof logout>>, void> = () => {
+
+
+          return  logout(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LogoutMutationResult = NonNullable<Awaited<ReturnType<typeof logout>>>
+
+    export type LogoutMutationError = ErrorType<unknown>
+
+    /**
+ * @summary End the current authenticated session
+ */
+export const useLogout = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof logout>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getLogoutMutationOptions(options));
+    }
 
 export const getGetMeUrl = () => {
 
@@ -1529,6 +1759,364 @@ export function useGetIntegrationsStatus<TData = Awaited<ReturnType<typeof getIn
 
 
 
+
+export const getListGoogleCalendarsUrl = () => {
+
+
+
+
+  return `/api/integrations/google/calendars`
+}
+
+/**
+ * @summary List Google calendars available for read and write selection
+ */
+export const listGoogleCalendars = async ( options?: RequestInit): Promise<GoogleCalendarsResponse> => {
+
+  return customFetch<GoogleCalendarsResponse>(getListGoogleCalendarsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListGoogleCalendarsQueryKey = () => {
+    return [
+    `/api/integrations/google/calendars`
+    ] as const;
+    }
+
+
+export const getListGoogleCalendarsQueryOptions = <TData = Awaited<ReturnType<typeof listGoogleCalendars>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listGoogleCalendars>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListGoogleCalendarsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listGoogleCalendars>>> = ({ signal }) => listGoogleCalendars({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listGoogleCalendars>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListGoogleCalendarsQueryResult = NonNullable<Awaited<ReturnType<typeof listGoogleCalendars>>>
+export type ListGoogleCalendarsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List Google calendars available for read and write selection
+ */
+
+export function useListGoogleCalendars<TData = Awaited<ReturnType<typeof listGoogleCalendars>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listGoogleCalendars>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListGoogleCalendarsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getSaveReadCalendarsUrl = () => {
+
+
+
+
+  return `/api/integrations/google/read-calendars`
+}
+
+/**
+ * @summary Save the selected read calendars
+ */
+export const saveReadCalendars = async (saveReadCalendarsInput: SaveReadCalendarsInput, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getSaveReadCalendarsUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      saveReadCalendarsInput,)
+  }
+);}
+
+
+
+
+export const getSaveReadCalendarsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveReadCalendars>>, TError,{data: BodyType<SaveReadCalendarsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof saveReadCalendars>>, TError,{data: BodyType<SaveReadCalendarsInput>}, TContext> => {
+
+const mutationKey = ['saveReadCalendars'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof saveReadCalendars>>, {data: BodyType<SaveReadCalendarsInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  saveReadCalendars(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SaveReadCalendarsMutationResult = NonNullable<Awaited<ReturnType<typeof saveReadCalendars>>>
+    export type SaveReadCalendarsMutationBody = BodyType<SaveReadCalendarsInput>
+    export type SaveReadCalendarsMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Save the selected read calendars
+ */
+export const useSaveReadCalendars = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveReadCalendars>>, TError,{data: BodyType<SaveReadCalendarsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof saveReadCalendars>>,
+        TError,
+        {data: BodyType<SaveReadCalendarsInput>},
+        TContext
+      > => {
+      return useMutation(getSaveReadCalendarsMutationOptions(options));
+    }
+
+export const getEnsureWriteCalendarUrl = () => {
+
+
+
+
+  return `/api/integrations/google/write-calendar/ensure`
+}
+
+/**
+ * @summary Ensure the dedicated Ghost Coach write calendar exists and is selected
+ */
+export const ensureWriteCalendar = async ( options?: RequestInit): Promise<EnsureWriteCalendarResult> => {
+
+  return customFetch<EnsureWriteCalendarResult>(getEnsureWriteCalendarUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getEnsureWriteCalendarMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ensureWriteCalendar>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof ensureWriteCalendar>>, TError,void, TContext> => {
+
+const mutationKey = ['ensureWriteCalendar'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof ensureWriteCalendar>>, void> = () => {
+
+
+          return  ensureWriteCalendar(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type EnsureWriteCalendarMutationResult = NonNullable<Awaited<ReturnType<typeof ensureWriteCalendar>>>
+
+    export type EnsureWriteCalendarMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Ensure the dedicated Ghost Coach write calendar exists and is selected
+ */
+export const useEnsureWriteCalendar = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ensureWriteCalendar>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof ensureWriteCalendar>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getEnsureWriteCalendarMutationOptions(options));
+    }
+
+export const getTestGoogleReadUrl = () => {
+
+
+
+
+  return `/api/integrations/google/test-read`
+}
+
+/**
+ * @summary Test reading selected Google calendars
+ */
+export const testGoogleRead = async ( options?: RequestInit): Promise<GoogleCalendarReadTestResult> => {
+
+  return customFetch<GoogleCalendarReadTestResult>(getTestGoogleReadUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getTestGoogleReadMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof testGoogleRead>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof testGoogleRead>>, TError,void, TContext> => {
+
+const mutationKey = ['testGoogleRead'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof testGoogleRead>>, void> = () => {
+
+
+          return  testGoogleRead(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type TestGoogleReadMutationResult = NonNullable<Awaited<ReturnType<typeof testGoogleRead>>>
+
+    export type TestGoogleReadMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Test reading selected Google calendars
+ */
+export const useTestGoogleRead = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof testGoogleRead>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof testGoogleRead>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getTestGoogleReadMutationOptions(options));
+    }
+
+export const getTestGoogleWriteUrl = () => {
+
+
+
+
+  return `/api/integrations/google/test-write`
+}
+
+/**
+ * @summary Test creating and deleting a temporary event in the dedicated write calendar
+ */
+export const testGoogleWrite = async ( options?: RequestInit): Promise<GoogleCalendarWriteTestResult> => {
+
+  return customFetch<GoogleCalendarWriteTestResult>(getTestGoogleWriteUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getTestGoogleWriteMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof testGoogleWrite>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof testGoogleWrite>>, TError,void, TContext> => {
+
+const mutationKey = ['testGoogleWrite'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof testGoogleWrite>>, void> = () => {
+
+
+          return  testGoogleWrite(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type TestGoogleWriteMutationResult = NonNullable<Awaited<ReturnType<typeof testGoogleWrite>>>
+
+    export type TestGoogleWriteMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Test creating and deleting a temporary event in the dedicated write calendar
+ */
+export const useTestGoogleWrite = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof testGoogleWrite>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof testGoogleWrite>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getTestGoogleWriteMutationOptions(options));
+    }
 
 export const getGetDebugPlanPreviewUrl = (params?: GetDebugPlanPreviewParams,) => {
   const normalizedParams = new URLSearchParams();

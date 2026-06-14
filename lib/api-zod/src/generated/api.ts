@@ -18,6 +18,26 @@ export const HealthCheckResponse = zod.object({
 
 
 /**
+ * @summary Get authentication and session status
+ */
+export const GetAuthStatusResponse = zod.object({
+  "authenticated": zod.boolean(),
+  "mockMode": zod.boolean(),
+  "allowedEmailConfigured": zod.boolean(),
+  "user": zod.union([zod.object({
+  "id": zod.string(),
+  "email": zod.string(),
+  "displayName": zod.string(),
+  "timezone": zod.string(),
+  "telegramUserId": zod.string().nullish(),
+  "telegramChatId": zod.string().nullish(),
+  "isActive": zod.boolean(),
+  "createdAt": zod.string()
+}),zod.null()]).optional()
+})
+
+
+/**
  * @summary Get current user
  */
 export const GetMeResponse = zod.object({
@@ -896,12 +916,22 @@ export const GetWeekResponse = zod.object({
  */
 export const GetIntegrationsStatusResponse = zod.object({
   "mockMode": zod.boolean(),
+  "auth": zod.object({
+  "authenticated": zod.boolean(),
+  "allowedEmailConfigured": zod.boolean(),
+  "userEmail": zod.string().nullish()
+}),
   "calendar": zod.object({
   "connected": zod.boolean(),
   "mock": zod.boolean(),
   "lastCheckAt": zod.string().nullish(),
   "error": zod.string().nullish()
-}),
+}).and(zod.object({
+  "providerAccountEmail": zod.string().nullish(),
+  "selectedReadCalendarIds": zod.array(zod.string()).optional(),
+  "writeCalendarId": zod.string().nullish(),
+  "lastSuccessAt": zod.string().nullish()
+})),
   "weather": zod.object({
   "connected": zod.boolean(),
   "mock": zod.boolean(),
@@ -920,6 +950,57 @@ export const GetIntegrationsStatusResponse = zod.object({
   "lastCheckAt": zod.string().nullish(),
   "error": zod.string().nullish()
 })
+})
+
+
+/**
+ * @summary List Google calendars available for read and write selection
+ */
+export const ListGoogleCalendarsResponse = zod.object({
+  "calendars": zod.array(zod.object({
+  "id": zod.string(),
+  "summary": zod.string(),
+  "primary": zod.boolean(),
+  "accessRole": zod.string(),
+  "selected": zod.boolean(),
+  "writeSelected": zod.boolean()
+}))
+})
+
+
+/**
+ * @summary Save the selected read calendars
+ */
+export const SaveReadCalendarsBody = zod.object({
+  "calendarIds": zod.array(zod.string())
+})
+
+
+/**
+ * @summary Ensure the dedicated Ghost Coach write calendar exists and is selected
+ */
+export const EnsureWriteCalendarResponse = zod.object({
+  "calendarId": zod.string(),
+  "summary": zod.string(),
+  "created": zod.boolean()
+})
+
+
+/**
+ * @summary Test reading selected Google calendars
+ */
+export const TestGoogleReadResponse = zod.object({
+  "ok": zod.boolean(),
+  "eventCount": zod.number()
+})
+
+
+/**
+ * @summary Test creating and deleting a temporary event in the dedicated write calendar
+ */
+export const TestGoogleWriteResponse = zod.object({
+  "ok": zod.boolean(),
+  "eventId": zod.string()
 })
 
 
