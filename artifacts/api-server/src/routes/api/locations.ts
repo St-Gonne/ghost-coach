@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { usersTable, locationsTable } from "@workspace/db/schema";
+import { locationsTable } from "@workspace/db/schema";
 import { eq, and } from "drizzle-orm";
 import {
   CreateLocationBody,
@@ -8,18 +8,13 @@ import {
   UpdateLocationParams,
   SetCurrentLocationBody,
 } from "@workspace/api-zod";
+import { requireRequestUser } from "../../auth/user";
 
 const router = Router();
 
-async function getFirstUser() {
-  const users = await db.select().from(usersTable).limit(1);
-  return users[0] ?? null;
-}
-
 router.get("/locations", async (req, res) => {
   try {
-    const user = await getFirstUser();
-    if (!user) return res.status(404).json({ error: "User not found" });
+    const user = requireRequestUser(req);
 
     const locations = await db
       .select()
@@ -36,8 +31,7 @@ router.get("/locations", async (req, res) => {
 
 router.post("/locations", async (req, res) => {
   try {
-    const user = await getFirstUser();
-    if (!user) return res.status(404).json({ error: "User not found" });
+    const user = requireRequestUser(req);
 
     const parsed = CreateLocationBody.safeParse(req.body);
     if (!parsed.success) {
@@ -61,8 +55,7 @@ router.put("/locations/:id", async (req, res) => {
     const params = UpdateLocationParams.safeParse(req.params);
     if (!params.success) return res.status(400).json({ error: "Invalid ID" });
 
-    const user = await getFirstUser();
-    if (!user) return res.status(404).json({ error: "User not found" });
+    const user = requireRequestUser(req);
 
     const parsed = UpdateLocationBody.safeParse(req.body);
     if (!parsed.success) {
@@ -87,8 +80,7 @@ router.put("/locations/:id", async (req, res) => {
 
 router.post("/locations/current", async (req, res) => {
   try {
-    const user = await getFirstUser();
-    if (!user) return res.status(404).json({ error: "User not found" });
+    const user = requireRequestUser(req);
 
     const parsed = SetCurrentLocationBody.safeParse(req.body);
     if (!parsed.success) {

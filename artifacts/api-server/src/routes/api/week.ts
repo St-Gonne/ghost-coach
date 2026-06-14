@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import {
-  usersTable,
   userSettingsTable,
   dailyPlansTable,
   planItemsTable,
@@ -10,18 +9,13 @@ import {
 } from "@workspace/db/schema";
 import { eq, and, gte, lte } from "drizzle-orm";
 import { startOfWeek, endOfWeek, eachDayOfInterval, format } from "date-fns";
+import { requireRequestUser } from "../../auth/user";
 
 const router = Router();
 
-async function getFirstUser() {
-  const users = await db.select().from(usersTable).limit(1);
-  return users[0] ?? null;
-}
-
 router.get("/week", async (req, res) => {
   try {
-    const user = await getFirstUser();
-    if (!user) return res.status(404).json({ error: "User not found" });
+    const user = requireRequestUser(req);
 
     const settings = await db
       .select()

@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import {
-  usersTable,
   userSettingsTable,
   locationsTable,
   activityTemplatesTable,
@@ -25,14 +24,10 @@ import type {
 } from "../../domain/types";
 import { subDays } from "date-fns";
 import type { WeatherScenario } from "../../integrations/weather/mock-weather";
+import { requireRequestUser } from "../../auth/user";
 
 const router = Router();
 const COMPLETED_OUTCOMES = new Set(["done", "partial"]);
-
-async function getFirstUser() {
-  const users = await db.select().from(usersTable).limit(1);
-  return users[0] ?? null;
-}
 
 async function runPlanPreview(params: {
   userId: string;
@@ -227,8 +222,7 @@ router.get("/debug/plan-preview", async (req, res) => {
   try {
     const query = GetDebugPlanPreviewQueryParams.safeParse(req.query);
 
-    const user = await getFirstUser();
-    if (!user) return res.status(404).json({ error: "User not found" });
+    const user = requireRequestUser(req);
 
     const localDate =
       (query.success && query.data.date) || localDateString(user.timezone);
@@ -303,8 +297,7 @@ router.post("/debug/mock-day", async (req, res) => {
         .json({ error: "Validation error", details: parsed.error.issues });
     }
 
-    const user = await getFirstUser();
-    if (!user) return res.status(404).json({ error: "User not found" });
+    const user = requireRequestUser(req);
 
     const localDate = parsed.data.date || localDateString(user.timezone);
 

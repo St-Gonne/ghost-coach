@@ -1,20 +1,15 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { usersTable, activityTemplatesTable } from "@workspace/db/schema";
+import { activityTemplatesTable } from "@workspace/db/schema";
 import { eq, and } from "drizzle-orm";
 import { CreateActivityBody, UpdateActivityBody, UpdateActivityParams } from "@workspace/api-zod";
+import { requireRequestUser } from "../../auth/user";
 
 const router = Router();
 
-async function getFirstUser() {
-  const users = await db.select().from(usersTable).limit(1);
-  return users[0] ?? null;
-}
-
 router.get("/activities", async (req, res) => {
   try {
-    const user = await getFirstUser();
-    if (!user) return res.status(404).json({ error: "User not found" });
+    const user = requireRequestUser(req);
 
     const activities = await db
       .select()
@@ -31,8 +26,7 @@ router.get("/activities", async (req, res) => {
 
 router.post("/activities", async (req, res) => {
   try {
-    const user = await getFirstUser();
-    if (!user) return res.status(404).json({ error: "User not found" });
+    const user = requireRequestUser(req);
 
     const parsed = CreateActivityBody.safeParse(req.body);
     if (!parsed.success) {
@@ -56,8 +50,7 @@ router.put("/activities/:id", async (req, res) => {
     const params = UpdateActivityParams.safeParse(req.params);
     if (!params.success) return res.status(400).json({ error: "Invalid ID" });
 
-    const user = await getFirstUser();
-    if (!user) return res.status(404).json({ error: "User not found" });
+    const user = requireRequestUser(req);
 
     const parsed = UpdateActivityBody.safeParse(req.body);
     if (!parsed.success) {
@@ -85,8 +78,7 @@ router.put("/activities/:id", async (req, res) => {
 
 router.delete("/activities/:id", async (req, res) => {
   try {
-    const user = await getFirstUser();
-    if (!user) return res.status(404).json({ error: "User not found" });
+    const user = requireRequestUser(req);
 
     await db
       .update(activityTemplatesTable)

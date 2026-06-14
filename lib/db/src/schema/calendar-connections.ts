@@ -12,6 +12,7 @@ export const calendarConnectionsTable = pgTable("calendar_connections", {
   tokenExpiry: timestamp("token_expiry", { withTimezone: true }),
   grantedScopes: text("granted_scopes"),
   providerAccountEmail: text("provider_account_email"),
+  providerAccountSub: text("provider_account_sub"),
   selectedReadCalendarIds: jsonb("selected_read_calendar_ids").$type<string[]>().notNull().default([]),
   writeCalendarId: text("write_calendar_id"),
   status: text("status").notNull().default("active"),

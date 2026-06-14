@@ -1,20 +1,15 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { usersTable, userSettingsTable } from "@workspace/db/schema";
+import { userSettingsTable } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
 import { UpdateSettingsBody } from "@workspace/api-zod";
+import { requireRequestUser } from "../../auth/user";
 
 const router = Router();
 
-async function getFirstUser() {
-  const users = await db.select().from(usersTable).limit(1);
-  return users[0] ?? null;
-}
-
 router.get("/settings", async (req, res) => {
   try {
-    const user = await getFirstUser();
-    if (!user) return res.status(404).json({ error: "User not found" });
+    const user = requireRequestUser(req);
 
     const settings = await db
       .select()
@@ -34,8 +29,7 @@ router.get("/settings", async (req, res) => {
 
 router.put("/settings", async (req, res) => {
   try {
-    const user = await getFirstUser();
-    if (!user) return res.status(404).json({ error: "User not found" });
+    const user = requireRequestUser(req);
 
     const parsed = UpdateSettingsBody.safeParse(req.body);
     if (!parsed.success) {

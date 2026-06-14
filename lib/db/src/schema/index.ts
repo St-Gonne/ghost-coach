@@ -1,4 +1,5 @@
 export * from "./users";
+export * from "./auth-sessions";
 export * from "./user-settings";
 export * from "./locations";
 export * from "./activity-templates";

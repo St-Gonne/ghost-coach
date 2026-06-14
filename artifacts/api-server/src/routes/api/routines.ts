@@ -1,15 +1,11 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { usersTable, routinePrescriptionsTable, activityTemplatesTable } from "@workspace/db/schema";
+import { routinePrescriptionsTable, activityTemplatesTable } from "@workspace/db/schema";
 import { eq, and } from "drizzle-orm";
 import { CreateRoutineBody, UpdateRoutineBody, UpdateRoutineParams } from "@workspace/api-zod";
+import { requireRequestUser } from "../../auth/user";
 
 const router = Router();
-
-async function getFirstUser() {
-  const users = await db.select().from(usersTable).limit(1);
-  return users[0] ?? null;
-}
 
 async function withTemplate(routine: typeof routinePrescriptionsTable.$inferSelect) {
   const templates = await db
@@ -22,8 +18,7 @@ async function withTemplate(routine: typeof routinePrescriptionsTable.$inferSele
 
 router.get("/routines", async (req, res) => {
   try {
-    const user = await getFirstUser();
-    if (!user) return res.status(404).json({ error: "User not found" });
+    const user = requireRequestUser(req);
 
     const routines = await db
       .select()
@@ -40,8 +35,7 @@ router.get("/routines", async (req, res) => {
 
 router.post("/routines", async (req, res) => {
   try {
-    const user = await getFirstUser();
-    if (!user) return res.status(404).json({ error: "User not found" });
+    const user = requireRequestUser(req);
 
     const parsed = CreateRoutineBody.safeParse(req.body);
     if (!parsed.success) {
@@ -74,8 +68,7 @@ router.put("/routines/:id", async (req, res) => {
     const params = UpdateRoutineParams.safeParse(req.params);
     if (!params.success) return res.status(400).json({ error: "Invalid ID" });
 
-    const user = await getFirstUser();
-    if (!user) return res.status(404).json({ error: "User not found" });
+    const user = requireRequestUser(req);
 
     const parsed = UpdateRoutineBody.safeParse(req.body);
     if (!parsed.success) {

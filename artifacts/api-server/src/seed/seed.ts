@@ -6,7 +6,6 @@ import {
   activityTemplatesTable,
   routinePrescriptionsTable,
 } from "@workspace/db/schema";
-import { eq } from "drizzle-orm";
 import { logger } from "../lib/logger";
 
 const SEED_EMAIL = "sharan@ghost.coach";
@@ -15,7 +14,6 @@ export async function seedIfEmpty(): Promise<void> {
   const existing = await db
     .select()
     .from(usersTable)
-    .where(eq(usersTable.email, SEED_EMAIL))
     .limit(1);
 
   if (existing.length > 0) {

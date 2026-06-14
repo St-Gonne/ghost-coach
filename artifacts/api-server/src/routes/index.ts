@@ -1,5 +1,6 @@
 import { Router, type IRouter } from "express";
 import healthRouter from "./health";
+import authRouter from "./api/auth";
 import meRouter from "./api/me";
 import settingsRouter from "./api/settings";
 import activitiesRouter from "./api/activities";
@@ -13,6 +14,7 @@ import integrationsRouter from "./api/integrations";
 const router: IRouter = Router();
 
 router.use(healthRouter);
+router.use(authRouter);
 router.use(meRouter);
 router.use(settingsRouter);
 router.use(activitiesRouter);

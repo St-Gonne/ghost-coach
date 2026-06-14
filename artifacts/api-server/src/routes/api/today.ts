@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import {
-  usersTable,
   userSettingsTable,
   locationsTable,
   activityTemplatesTable,
@@ -24,14 +23,10 @@ import type {
   PlanItemState,
 } from "../../domain/types";
 import { subDays } from "date-fns";
+import { requireRequestUser } from "../../auth/user";
 
 const router = Router();
 const COMPLETED_OUTCOMES = new Set(["done", "partial"]);
-
-async function getFirstUser() {
-  const users = await db.select().from(usersTable).limit(1);
-  return users[0] ?? null;
-}
 
 async function getItemWithTemplate(id: string | null | undefined) {
   if (!id) return null;
@@ -141,8 +136,7 @@ function sameCandidateAndItem(
 
 router.get("/today", async (req, res) => {
   try {
-    const user = await getFirstUser();
-    if (!user) return res.status(404).json({ error: "User not found" });
+    const user = requireRequestUser(req);
 
     const localDate = localDateString(user.timezone);
     return res.json(await buildTodayResponse(user.id, localDate));
@@ -154,8 +148,7 @@ router.get("/today", async (req, res) => {
 
 router.post("/today/replan", async (req, res) => {
   try {
-    const user = await getFirstUser();
-    if (!user) return res.status(404).json({ error: "User not found" });
+    const user = requireRequestUser(req);
 
     const [settingsRow] = await db
       .select()
@@ -489,21 +482,19 @@ router.post("/plan-items/:id/action", async (req, res) => {
       .returning();
 
     if (["done", "partial", "skip"].includes(parsed.data.action)) {
-      const user = await getFirstUser();
-      if (user) {
-        await db.insert(activityLogsTable).values({
-          userId: user.id,
-          planItemId: item.id,
-          activityTemplateId: item.activityTemplateId,
-          startedAt: item.scheduledStartAt,
-          endedAt: item.scheduledEndAt,
-          actualMinutes: parsed.data.actualMinutes ?? null,
-          outcome: parsed.data.action,
-          skipReason: parsed.data.skipReason ?? null,
-          source: "web",
-          notesOptional: parsed.data.notes ?? null,
-        });
-      }
+      const user = requireRequestUser(req);
+      await db.insert(activityLogsTable).values({
+        userId: user.id,
+        planItemId: item.id,
+        activityTemplateId: item.activityTemplateId,
+        startedAt: item.scheduledStartAt,
+        endedAt: item.scheduledEndAt,
+        actualMinutes: parsed.data.actualMinutes ?? null,
+        outcome: parsed.data.action,
+        skipReason: parsed.data.skipReason ?? null,
+        source: "web",
+        notesOptional: parsed.data.notes ?? null,
+      });
 
       if (["done", "partial"].includes(parsed.data.action)) {
         await db
