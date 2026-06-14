@@ -89,3 +89,157 @@ Drizzle push (`pnpm --filter @workspace/db run push`) applies the full schema di
 6. Plan state transitions follow the defined machine
 7. Nudge policy respects quiet hours and daily cap
 8. LLM invalid ID falls back to deterministic selection
+
+## Phase 2: Real Calendar and Weather Foundation
+
+### Scope
+
+Implement only the secure real-integration foundation for:
+
+- authentication restricted to `ALLOWED_EMAIL`
+- Google OAuth
+- Google Calendar read integration
+- dedicated Ghost Coach write calendar selection and safety checks
+- Open-Meteo hourly weather integration
+- integration status and test UI
+- required migrations, tests, and docs
+
+Explicit non-goals for this phase:
+
+- Telegram delivery
+- cron/job dispatcher
+- Gemini or LLM behavior changes
+- Health Connect
+- Samsung Watch
+- food-photo analysis
+- WhatsApp
+- continuous location
+- any Phase 3 feature
+
+### Phase 2 Commit Order
+
+1. plan and migration inventory
+2. authentication and sessions
+3. Google OAuth and encrypted token storage
+4. calendar read and selection
+5. dedicated write calendar safety
+6. Open-Meteo weather adapter
+7. dashboard integration UI
+8. tests and docs
+
+### Exact Schema Changes
+
+Phase 2 will keep using Drizzle schema definitions plus `pnpm --filter @workspace/db run push`.
+
+Planned schema changes:
+
+1. Add `auth_sessions` table in `lib/db/src/schema/auth-sessions.ts`
+   - `id`
+   - `user_id`
+   - `session_token_hash`
+   - `csrf_token_hash`
+   - `expires_at`
+   - `created_at`
+   - `updated_at`
+
+2. Extend `calendar_connections` in `lib/db/src/schema/calendar-connections.ts`
+   - add `provider_account_sub`
+   - keep encrypted token values in the existing token columns, but store AES-256-GCM payload strings instead of plaintext
+
+### Exact Files Expected To Change
+
+Repository and docs:
+
+- `IMPLEMENTATION_PLAN.md`
+- `README.md`
+- `.env.example`
+- `DECISIONS.md`
+
+Database:
+
+- `lib/db/src/schema/auth-sessions.ts` (new)
+- `lib/db/src/schema/calendar-connections.ts`
+- `lib/db/src/schema/index.ts`
+
+API spec and generated client:
+
+- `lib/api-spec/openapi.yaml`
+- `lib/api-client-react/src/generated/*`
+- `lib/api-zod/src/generated/*`
+
+API server:
+
+- `artifacts/api-server/package.json`
+- `artifacts/api-server/src/config.ts`
+- `artifacts/api-server/src/app.ts`
+- `artifacts/api-server/src/routes/index.ts`
+- `artifacts/api-server/src/routes/api/me.ts`
+- `artifacts/api-server/src/routes/api/integrations.ts`
+- `artifacts/api-server/src/routes/api/today.ts`
+- `artifacts/api-server/src/routes/api/debug.ts`
+- `artifacts/api-server/src/integrations/index.ts`
+- `artifacts/api-server/src/integrations/calendar/index.ts`
+- `artifacts/api-server/src/integrations/calendar/mock-calendar.ts`
+- `artifacts/api-server/src/integrations/weather/index.ts`
+- `artifacts/api-server/src/integrations/weather/mock-weather.ts`
+
+New API server files expected:
+
+- `artifacts/api-server/src/auth/session-service.ts`
+- `artifacts/api-server/src/auth/session-middleware.ts`
+- `artifacts/api-server/src/auth/csrf.ts`
+- `artifacts/api-server/src/auth/google-oauth.ts`
+- `artifacts/api-server/src/auth/token-crypto.ts`
+- `artifacts/api-server/src/integrations/calendar/google-calendar.ts`
+- `artifacts/api-server/src/integrations/weather/open-meteo.ts`
+- `artifacts/api-server/src/routes/api/auth.ts`
+
+Frontend:
+
+- `artifacts/ghost-coach-web/src/App.tsx`
+- `artifacts/ghost-coach-web/src/components/layout.tsx`
+- `artifacts/ghost-coach-web/src/pages/debug.tsx`
+- `artifacts/ghost-coach-web/src/pages/today.tsx`
+
+New frontend files expected:
+
+- `artifacts/ghost-coach-web/src/pages/integrations.tsx`
+- `artifacts/ghost-coach-web/src/pages/login.tsx`
+
+Tests:
+
+- `artifacts/api-server/tests/integration/planning-pipeline.test.ts`
+- `artifacts/api-server/tests/scenarios/acceptance-scenarios.test.ts`
+
+New tests expected:
+
+- `artifacts/api-server/tests/unit/token-crypto.test.ts`
+- `artifacts/api-server/tests/unit/session-service.test.ts`
+- `artifacts/api-server/tests/unit/google-calendar.test.ts`
+- `artifacts/api-server/tests/unit/open-meteo.test.ts`
+- `artifacts/api-server/tests/integration/auth-routes.test.ts`
+- `artifacts/api-server/tests/integration/integrations-routes.test.ts`
+
+### Manual Google Cloud Setup
+
+This remains a manual setup track and will be documented separately from code changes:
+
+1. Create a Google Cloud project for Ghost Coach.
+2. Enable Google Calendar API.
+3. Configure the OAuth consent screen.
+4. Add the exact application origin and callback URL.
+5. Create a Web OAuth client.
+6. Add `ALLOWED_EMAIL` as the test user if the app is not yet published.
+7. Copy the issued values into `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `GOOGLE_REDIRECT_URI`.
+8. Generate a 32-byte base64 encryption key for `TOKEN_ENCRYPTION_KEY_BASE64`.
+9. Connect the account from the dashboard.
+10. Select the read calendars and a dedicated Ghost Coach write calendar.
+
+### Implementation Notes
+
+- Mock mode must stay fully working. When `MOCK_INTEGRATIONS=true`, the dashboard remains usable without real Google or Open-Meteo credentials.
+- Real-calendar access must be blocked unless Google session auth succeeds and the authenticated email exactly matches `ALLOWED_EMAIL`.
+- The app may read only the user-selected calendars.
+- The app may write only to the dedicated Ghost Coach calendar and may delete only the test event it created for write verification in this phase.
+- If calendar read fails, the app must not claim that a block was created.
+- If weather fetch fails, planning must fall back conservatively rather than crashing.
