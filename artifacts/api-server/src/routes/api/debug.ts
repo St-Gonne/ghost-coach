@@ -15,7 +15,7 @@ import {
   RunMockDayBody,
   RetryJobParams,
 } from "@workspace/api-zod";
-import { getAdapters } from "../../integrations";
+import { getDebugAdapters } from "../../integrations";
 import { createDailyPlan } from "../../planner/create-daily-plan";
 import { localDateString } from "../../domain/time";
 import type {
@@ -24,10 +24,7 @@ import type {
   CoachingSettings,
 } from "../../domain/types";
 import { subDays } from "date-fns";
-import type {
-  MockWeatherAdapter,
-  WeatherScenario,
-} from "../../integrations/weather/mock-weather";
+import type { WeatherScenario } from "../../integrations/weather/mock-weather";
 
 const router = Router();
 const COMPLETED_OUTCOMES = new Set(["done", "partial"]);
@@ -202,14 +199,9 @@ async function runPlanPreview(params: {
     active: a.active,
   }));
 
-  const adapters = getAdapters();
-
-  if (params.weatherOverride && adapters.weather.mock) {
-    const weatherAdapter = adapters.weather as MockWeatherAdapter;
-    if (typeof weatherAdapter.setScenario === "function") {
-      weatherAdapter.setScenario(params.weatherOverride as WeatherScenario);
-    }
-  }
+  const adapters = getDebugAdapters(
+    params.weatherOverride as WeatherScenario | undefined,
+  );
 
   return createDailyPlan({
     userId: params.userId,
@@ -298,7 +290,7 @@ router.get("/debug/plan-preview", async (req, res) => {
     });
   } catch (err) {
     req.log.error({ err }, "GET /debug/plan-preview error");
-    return res.status(500).json({ error: String(err) });
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -368,7 +360,7 @@ router.post("/debug/mock-day", async (req, res) => {
     });
   } catch (err) {
     req.log.error({ err }, "POST /debug/mock-day error");
-    return res.status(500).json({ error: String(err) });
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 
