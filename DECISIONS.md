@@ -59,3 +59,27 @@
 **Decision:** Dashboard routes are lightly protected by an internal `X-Ghost-Coach-Session` header check in Phase 1. Full Google OAuth session handling is Phase 2.
 
 **Why:** Phase 1 is a personal local prototype. Real auth (Google sign-in, single-user restriction) is Phase 2 scope.
+
+## D11: Phase 2 keeps mock mode as a first-class path
+
+**Decision:** `MOCK_INTEGRATIONS=true` still bypasses real OAuth and real external adapters while preserving the full planner and dashboard workflow.
+
+**Why:** The product must remain reproducible without external secrets, and Phase 2 must not break the existing Phase 1 local demo path.
+
+## D12: Real auth uses opaque server-side sessions plus CSRF protection
+
+**Decision:** Real mode uses an HTTP-only session cookie backed by the `auth_sessions` table, plus a separate CSRF token cookie/header check for state-changing requests.
+
+**Why:** The browser must never receive Google tokens, and same-user local dashboard actions still need CSRF protection once real calendar access exists.
+
+## D13: Transition seeded Phase 1 data onto the real allowed user
+
+**Decision:** On the first successful Google login, Ghost Coach upgrades the seeded single-user row to the authenticated `ALLOWED_EMAIL` account instead of creating a disconnected second profile when possible.
+
+**Why:** This preserves the existing settings, locations, activities, and routines from mock mode while still enforcing the real account boundary.
+
+## D14: Dedicated write-calendar safety before automatic writes
+
+**Decision:** Phase 2 introduces explicit write-calendar selection/creation and test write-delete verification, but not automatic planner event writes.
+
+**Why:** The safety boundary matters before the job loop exists. This phase proves that Ghost Coach can write only to its own calendar without widening scope into scheduler behavior.

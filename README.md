@@ -1,8 +1,8 @@
 # Ghost Coach
 
-Ghost Coach is a personal movement-planning prototype. Phase 1 provides a
-deterministic planning engine, mock integrations, an Express API, and a React
-dashboard for reviewing and acting on a daily plan.
+Ghost Coach is a personal movement-planning prototype. The current repository
+includes the Phase 1 deterministic planner and the Phase 2 secure integration
+foundation for authentication, Google Calendar connection, and live weather.
 
 The planner evaluates calendar availability, location capabilities, weather,
 activity requirements, physio approval, and recent completion history. It
@@ -23,8 +23,17 @@ Mock mode supports local planning, candidate rejection inspection, plan actions
 (`Done`, `Partial`, and `Skip`), and scenario previews. Physio instructions are
 not seeded, and an unapproved physio routine is never scheduled.
 
-Real Google Calendar, Telegram, Health Connect, and live weather integrations
-are not active in Phase 1.
+When `MOCK_INTEGRATIONS=false` and the required credentials are configured,
+Ghost Coach can:
+
+- authenticate the single allowed user with Google OAuth
+- store Google tokens encrypted at rest
+- read only the selected Google calendars
+- create or select a dedicated Ghost Coach write calendar
+- fetch live daily weather from Open-Meteo
+
+Telegram, Health Connect, scheduler/cron processing, and other later-phase
+integrations are still not active.
 
 ## Technology Stack
 
@@ -64,8 +73,19 @@ Create a local environment file:
 cp .env.example .env
 ```
 
-Update `DATABASE_URL` for your PostgreSQL instance. Phase 1 local development
-requires `MOCK_INTEGRATIONS=true`.
+Update `DATABASE_URL` for your PostgreSQL instance.
+
+Phase 1-style local development can continue with `MOCK_INTEGRATIONS=true`.
+
+For the real Phase 2 integration path, set:
+
+- `MOCK_INTEGRATIONS=false`
+- `ALLOWED_EMAIL`
+- `SESSION_SECRET`
+- `TOKEN_ENCRYPTION_KEY_BASE64` as 32 random bytes encoded in base64
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- `GOOGLE_REDIRECT_URI`
 
 The application does not load `.env` automatically. Export it into each shell
 before running database or API commands:
@@ -171,14 +191,10 @@ Architecture decisions and test coverage are documented in `DECISIONS.md`,
 `IMPLEMENTATION_PLAN.md`, `TEST_PLAN.md`, and
 `PHASE1_INDEPENDENT_REVIEW.md`.
 
-## Known Phase 1 Limitations
+## Known Limitations
 
-- Authentication is only a Phase 1 local prototype boundary; real calendar
-  data must not be connected before Phase 2 authentication and authorization.
-- Google OAuth and Google Calendar read/write are not implemented.
 - Telegram delivery and scheduled background nudges are not live.
 - Health Connect is not implemented.
-- Weather is simulated in mock mode; live weather is not active.
 - The LLM adapter is mocked and may only select from deterministic,
   prevalidated candidate IDs.
 - Concurrent identical replan requests do not have a database advisory lock.
@@ -186,5 +202,6 @@ Architecture decisions and test coverage are documented in `DECISIONS.md`,
 - Seed data intentionally contains no medical exercise instructions.
 - The frontend production bundle currently emits a non-failing large-chunk
   warning.
-
-Phase 2 integrations are intentionally out of scope for this baseline.
+- Real Google Calendar write safety in this phase is limited to the dedicated
+  Ghost Coach calendar and test-event verification. Full automatic planning
+  writes, job execution, and re-planning loops remain later-phase work.

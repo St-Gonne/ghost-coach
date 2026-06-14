@@ -10,6 +10,8 @@ export type AuthTokenGetter = () => Promise<string | null> | string | null;
 
 const NO_BODY_STATUS = new Set([204, 205, 304]);
 const DEFAULT_JSON_ACCEPT = "application/json, application/problem+json";
+const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
+const CSRF_COOKIE_NAME = "ghost_coach_csrf";
 
 // ---------------------------------------------------------------------------
 // Module-level configuration
@@ -146,6 +148,18 @@ function getStringField(value: unknown, key: string): string | undefined {
 
 function truncate(text: string, maxLength = 300): string {
   return text.length > maxLength ? `${text.slice(0, maxLength - 1)}…` : text;
+}
+
+function readCookie(name: string): string | null {
+  if (typeof document === "undefined") return null;
+
+  const match = document.cookie
+    .split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(`${name}=`));
+
+  if (!match) return null;
+  return decodeURIComponent(match.slice(name.length + 1));
 }
 
 function buildErrorMessage(response: Response, data: unknown): string {
@@ -358,9 +372,21 @@ export async function customFetch<T = unknown>(
     }
   }
 
+  if (!SAFE_METHODS.has(method) && !headers.has("x-csrf-token")) {
+    const csrfToken = readCookie(CSRF_COOKIE_NAME);
+    if (csrfToken) {
+      headers.set("x-csrf-token", csrfToken);
+    }
+  }
+
   const requestInfo = { method, url: resolveUrl(input) };
 
-  const response = await fetch(input, { ...init, method, headers });
+  const response = await fetch(input, {
+    credentials: init.credentials ?? "include",
+    ...init,
+    method,
+    headers,
+  });
 
   if (!response.ok) {
     const errorData = await parseErrorBody(response, method);

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useHealthCheck } from "@workspace/api-client-react";
+import { useGetAuthStatus, useHealthCheck } from "@workspace/api-client-react";
 import { Link, useLocation } from "wouter";
 import {
   Activity,
@@ -9,6 +9,7 @@ import {
   Settings,
   Bug,
   CheckCircle2,
+  Shield,
   User,
   Menu,
   X,
@@ -23,11 +24,13 @@ export function cn(...inputs: ClassValue[]) {
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const { data: health } = useHealthCheck();
+  const { data: auth } = useGetAuthStatus();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const navItems = [
     { href: "/", label: "Today", icon: LayoutDashboard },
     { href: "/week", label: "Week", icon: Calendar },
+    { href: "/integrations", label: "Integrations", icon: Shield },
     { href: "/activities", label: "Activities", icon: Activity },
     { href: "/routines", label: "Routines", icon: CheckCircle2 },
     { href: "/locations", label: "Locations", icon: MapPin },
@@ -100,7 +103,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="p-4 border-t border-sidebar-border">
           <div className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-sidebar-foreground/70">
             <User className="w-4 h-4 flex-shrink-0" />
-            Sharan
+            {auth?.user?.displayName ?? auth?.user?.email ?? "Sharan"}
           </div>
         </div>
       </aside>
