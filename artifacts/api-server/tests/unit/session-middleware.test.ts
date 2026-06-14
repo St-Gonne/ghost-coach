@@ -31,6 +31,7 @@ describe("authenticateApiRequest", () => {
     const { authenticateApiRequest } = await import(
       "../../src/auth/session-middleware"
     );
+    const { getRequestUser } = await import("../../src/auth/request-context");
 
     const req = {
       method: "GET",
@@ -44,7 +45,7 @@ describe("authenticateApiRequest", () => {
     await authenticateApiRequest(req, res, next);
 
     expect(next).toHaveBeenCalled();
-    expect(req.ghostCoachUser?.email).toBe("mock@example.com");
+    expect(getRequestUser(req)?.email).toBe("mock@example.com");
   });
 
   it("rejects real-mode requests without a session cookie", async () => {

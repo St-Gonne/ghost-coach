@@ -8,6 +8,7 @@ import {
   SESSION_COOKIE_NAME,
 } from "./cookies";
 import { getSessionByToken, validateCsrfToken } from "./session-service";
+import { setRequestContext } from "./request-context";
 
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
@@ -34,7 +35,7 @@ export async function authenticateApiRequest(
 ): Promise<void> {
   try {
     if (config.mockIntegrations) {
-      req.ghostCoachUser = await getMockUser();
+      setRequestContext(req, { user: await getMockUser() ?? undefined });
       return void next();
     }
 
@@ -82,8 +83,10 @@ export async function authenticateApiRequest(
       }
     }
 
-    req.ghostCoachUser = session.user;
-    req.ghostCoachSessionId = session.session.id;
+    setRequestContext(req, {
+      user: session.user,
+      sessionId: session.session.id,
+    });
     next();
   } catch (err) {
     req.log.error({ err }, "Authentication middleware error");

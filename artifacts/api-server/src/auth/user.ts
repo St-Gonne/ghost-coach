@@ -8,11 +8,12 @@ import {
   usersTable,
 } from "@workspace/db/schema";
 import { and, eq } from "drizzle-orm";
+import { getRequestUser } from "./request-context";
 
 const DEFAULT_EMAIL = "sharan@ghost.coach";
 
 export function requireRequestUser(req: Request) {
-  const user = req.ghostCoachUser;
+  const user = getRequestUser(req);
   if (!user) {
     throw new Error("Authenticated user missing from request context");
   }

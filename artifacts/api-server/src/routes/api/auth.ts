@@ -21,6 +21,7 @@ import { clearAuthenticatedSession } from "../../auth/session-middleware";
 import { createSession } from "../../auth/session-service";
 import { ensureGhostCoachUser } from "../../auth/user";
 import { encryptToken } from "../../auth/token-crypto";
+import { getRequestUser } from "../../auth/request-context";
 
 const router = Router();
 
@@ -31,15 +32,15 @@ router.get("/auth/status", async (req, res) => {
         authenticated: true,
         mockMode: true,
         allowedEmailConfigured: Boolean(config.allowedEmail),
-        user: req.ghostCoachUser ?? null,
+        user: getRequestUser(req) ?? null,
       });
     }
 
     return res.json({
-      authenticated: Boolean(req.ghostCoachUser),
+      authenticated: Boolean(getRequestUser(req)),
       mockMode: false,
       allowedEmailConfigured: Boolean(config.allowedEmail),
-      user: req.ghostCoachUser ?? null,
+      user: getRequestUser(req) ?? null,
     });
   } catch (err) {
     req.log.error({ err }, "GET /auth/status error");
