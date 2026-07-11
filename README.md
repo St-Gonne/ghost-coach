@@ -1,5 +1,7 @@
 # Ghost Coach
 
+**Where this fits (note added July 2026):** this is a paused prototype from mid-June 2026, and its the oldest thing in my portfolio... built before [meeting-intelligence-system](https://github.com/sharantulsiani-ui/meeting-intelligence-system) and [ai-chief-of-staff](https://github.com/sharantulsiani-ui/ai-chief-of-staff). I don't write code; the AI wrote the implementation from a written spec, and the method that runs my current systems is already visible here a month earlier: a decisions log (DECISIONS.md), a test plan, a phase audit, an independent review, and mock-first gating so nothing needed real credentials to be judged. It's runnable in mock mode if you want to poke at it. Paused, not dead — the plan is for its ideas to fold into the chief of staff's health loop eventually. If you learn from it or build on it, credit is the ask (see [LICENSE.md](LICENSE.md)).
+
 Ghost Coach is a personal movement-planning prototype. Phase 1 provides a
 deterministic planning engine, mock integrations, an Express API, and a React
 dashboard for reviewing and acting on a daily plan.
