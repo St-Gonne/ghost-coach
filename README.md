@@ -1,6 +1,15 @@
 # Ghost Coach
 
-**Where this fits (note added July 2026):** this is a paused prototype from mid-June 2026, and its the oldest thing in my portfolio... built before [meeting-intelligence-system](https://github.com/sharantulsiani-ui/meeting-intelligence-system) and [ai-chief-of-staff](https://github.com/sharantulsiani-ui/ai-chief-of-staff). I don't write code; the AI wrote the implementation from a written spec, and the method that runs my current systems is already visible here a month earlier: a decisions log (DECISIONS.md), a test plan, a phase audit, an independent review, and mock-first gating so nothing needed real credentials to be judged. Who built it: ChatGPT and Replit's agent, a bit of Claude in chat, and me in the terminal copy pasting code between them... I think. It was early days and I kept no control file yet, which is partly why the later systems have one. It's runnable in mock mode if you want to poke at it. Paused, not dead — the plan is for its ideas to fold into the chief of staff's health loop eventually. If you learn from it or build on it, credit is the ask (see [LICENSE.md](LICENSE.md)).
+**Paused prototype, June 2026.** This was my first attempt at turning a written
+product specification into working software with AI coding tools. It includes a
+planning engine, mock integrations and a review dashboard. The real integrations
+remain unfinished.
+
+I keep it here as an early example of the method behind
+[MeetingIntel](https://github.com/St-Gonne/meeting-intelligence-system): write down
+the constraints, test with synthetic inputs, and record what failed. ChatGPT,
+Replit's agent and Claude helped with implementation. The phase review and known
+limitations below describe the published baseline; this is not an active release.
 
 Ghost Coach is a personal movement-planning prototype. Phase 1 provides a
 deterministic planning engine, mock integrations, an Express API, and a React
