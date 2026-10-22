@@ -10,4 +10,4 @@ Plain English for both: you're welcome to read this, learn from it, run it for y
 
 This is building in the open. It is not open source.
 
-Permissions and questions: sharan.tulsiani@gmail.com
+Permissions and questions: contact @St-Gonne on GitHub.
